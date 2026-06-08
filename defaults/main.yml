@@ -1,0 +1,13 @@
+---
+ovn_version: "latest"
+ovn_mgmt_cidr:
+  - "0.0.0.0/0"
+is_controller: false
+is_leader: false
+is_node: false
+ovn_central_conf_default:
+  db_nb_addr: ""
+  db_nb_port: "6641"
+  db_sb_addr: ""
+  db_sb_port: "6642"
+  db_insecure: true

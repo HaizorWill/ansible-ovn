@@ -1,0 +1,3 @@
+---
+ovn_central_package: "ovn-central{{ (ovn_version != 'latest' ) | ansible.builtin.ternary('=' ~ ovn_version, '') }}"
+ovn_host_package: "ovn-host{{ (ovn_version != 'latest') | ansible.builtin.ternary('=' ~ ovn_version, '') }}"

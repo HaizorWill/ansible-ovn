@@ -1,0 +1,15 @@
+---
+- name: "Ovn-central package is installed"
+  ansible.builtin.package:
+    name: "{{ ovn_central_package }}"
+    state: "{{ (ovn_version != 'latest') | ansible.builtin.ternary('present', 'latest') }}"
+
+- name: "Ovn-central parameters file is generated"
+  ansible.builtin.template:
+    src: "templates/ovn-central.j2"
+    dest: "/etc/default/ovn-central"
+    owner: "root"
+    group: "root"
+    mode: "644"
+  notify:
+    - Enable ovn-central service

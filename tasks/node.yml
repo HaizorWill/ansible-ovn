@@ -1,0 +1,5 @@
+---
+- name: "Host components for OVN are installed"
+  ansible.builtin.package:
+    name: "{{ ovn_host_package }}"
+    state: "{{ (ovn_version != latest) | ansible.builtin.ternary('present', 'latest') }}"

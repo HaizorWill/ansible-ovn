@@ -1,0 +1,56 @@
+---
+- name: "Default variables are combined"
+  block:
+    - name: "OVN controller variables are merged"
+      ansible.builtin.set_fact:
+        ovn_central_conf: "{{ ovn_central_conf_default | ansible.builtin.combine(ovn_central_conf | default({}), recursive=true) }}"
+
+- name: "There is only one leader defined"
+  ansible.builtin.assert:
+    that:
+      - cluster_leaders | length == 1
+    fail_msg: >-
+      "Expected exactly one leader, found {{ cluster_leaders | length }}:
+      {{ cluster_leaders | join(',') }}"
+  vars:
+    cluster_leaders: >-
+      {{ hostvars | dict2items
+      | selectattr('value.is_controller', 'defined')
+      | selectattr('value.is_controller', 'true')
+      | selectattr('value.is_leader', 'defined')
+      | selectattr('value.is_leader', 'true')
+      | map(attribute='key')
+      | list }}
+
+- name: "Variables for operating system are defined"
+  ansible.builtin.include_vars: "{{ distrovars }}"
+  vars:
+    distrovars: "{{ lookup('first_found', lookup_vars) }}"
+    lookup_vars:
+      files:
+        - "{{ ansible_facts['distribution'] | lower }}.yml"
+        - "{{ ansible_facts['os_family'] | lower }}.yml"
+      paths:
+        - "vars"
+      skip: true
+
+- name: "Set address"
+  ansible.builtin.set_fact:
+    ovn_addr: >-
+      {{ ansible_facts.all_ipv4_addresses
+      | ansible.builtin.select('ansible.utils.in_any_network', ovn_mgmt_cidr)
+      | ansible.builtin.first }}
+
+- name: "Controller components for OVN are installed"
+  ansible.builtin.include_tasks:
+    file: controller.yml
+    apply:
+      become: true
+  when: is_controller | default(false) | bool
+
+- name: "Host components for OVN are installed"
+  ansible.builtin.include_tasks:
+    file: node.yml
+    apply:
+      become: true
+  when: is_node | default(false) | bool
