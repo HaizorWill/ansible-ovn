@@ -1,0 +1,5 @@
+OVN_CTL_OPTS="\
+{% for option, value in ovn_host_conf.items() if value is not mapping %}
+--{{ option | replace('_', '-') }}={{ value }} \
+{% endfor %}
+"

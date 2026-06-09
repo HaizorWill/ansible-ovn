@@ -10,3 +10,10 @@
     name: "ovn-central"
     enabled: true
     state: "restarted"
+
+- name: "Enable ovn-host service"
+  become: true
+  ansible.builtin.systemd_service:
+    name: "ovn-host"
+    enabled: true
+    state: "restarted"
