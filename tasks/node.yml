@@ -2,7 +2,7 @@
 - name: "Host components for OVN are installed"
   ansible.builtin.package:
     name: "{{ ovn_host_package }}"
-    state: "{{ (ovn_version != latest) | ansible.builtin.ternary('present', 'latest') }}"
+    state: "{{ (ovn_version != 'latest') | ansible.builtin.ternary('present', 'latest') }}"
 
 - name: "Ovn-host parameters file is generated"
   ansible.builtin.template:
@@ -14,3 +14,11 @@
   notify:
     - Enable ovn-host service
 
+- name: "Metadata for OVN-Controller is set"
+  ovsdb-externalids:
+    remote: "unix:/var/run/openvswitch/db.sock"
+    ext_ids:
+      - "ovn-remote={{ __ovn_sb_connection }}"
+      - "ovn-encap-type=geneve"
+      - "ovn-encap-ip={{ ovn_addr }}"
+  become: true
