@@ -10,6 +10,6 @@
     dest: "/etc/default/ovn-central"
     owner: "root"
     group: "root"
-    mode: "644"
+    mode: "0644"
   notify:
     - Enable ovn-central service

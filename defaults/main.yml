@@ -11,3 +11,9 @@ ovn_central_conf_default:
   db_sb_addr: ""
   db_sb_port: "6642"
   db_insecure: true
+ovn_host_conf_default:
+  ovn-controller-priority: ""
+  ovn-controller-ssl-key: ""
+  ovn-controller-ssl-cert: ""
+  ovn-controller-ssl-ca-cert: ""
+  ovn-controller-system-id: ""
