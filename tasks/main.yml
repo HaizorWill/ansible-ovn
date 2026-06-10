@@ -4,6 +4,9 @@
     - name: "OVN controller variables are merged"
       ansible.builtin.set_fact:
         ovn_central_conf: "{{ ovn_central_conf_default | ansible.builtin.combine(ovn_central_conf | default({}), recursive=true) }}"
+    - name: "OVN host variables are merged"
+      ansible.builtin.set_fact:
+        ovn_host_conf: "{{ ovn_host_conf_default | ansible.builtin.combine(ovn_host_conf | default({}), recursive=true) }}"
 
 - name: "There is only one leader defined"
   ansible.builtin.assert:
@@ -47,6 +50,7 @@
     apply:
       become: true
   when: is_controller | default(false) | bool
+
 
 - name: "Host components for OVN are installed"
   ansible.builtin.include_tasks:
