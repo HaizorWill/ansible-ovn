@@ -8,10 +8,11 @@ OVN_CTL_OPTS="\
 --db-nb-create-insecure-remote=yes \
 --db-sb-create-insecure-remote=yes \
 {% endif %}
-{% if is_leader | bool and __ovn_cluster_leader %}
---db-nb-cluster-local-addr={{ __ovn_cluster_leader }}
---db-sb-cluster-local-addr={{ __ovn_cluster_leader }}
-{% elif not is_leader | bool and __ovn_cluster_leader %}
+{% if __ovn_cluster_leader %}
+--db-nb-cluster-local-addr={{ ovn_addr }}
+--db-sb-cluster-local-addr={{ ovn_addr }}
+{% endif %}
+{% if not is_leader | bool and __ovn_cluster_leader %}
 --db-nb-cluster-remote-addr={{ __ovn_cluster_leader }}
 --db-sb-cluster-remote-addr={{ __ovn_cluster_leader }}
 {% endif %}
