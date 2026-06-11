@@ -1,13 +1,4 @@
 ---
-- name: "Default variables are combined"
-  block:
-    - name: "OVN controller variables are merged"
-      ansible.builtin.set_fact:
-        ovn_central_conf: "{{ ovn_central_conf_default | ansible.builtin.combine(ovn_central_conf | default({}), recursive=true) }}"
-    - name: "OVN host variables are merged"
-      ansible.builtin.set_fact:
-        ovn_host_conf: "{{ ovn_host_conf_default | ansible.builtin.combine(ovn_host_conf | default({}), recursive=true) }}"
-
 - name: "There is only one leader defined"
   ansible.builtin.assert:
     that:
@@ -18,10 +9,10 @@
   vars:
     cluster_leaders: >-
       {{ hostvars | dict2items
-      | selectattr('value.is_controller', 'defined')
-      | selectattr('value.is_controller', 'true')
-      | selectattr('value.is_leader', 'defined')
-      | selectattr('value.is_leader', 'true')
+      | selectattr('value.ovn_is_controller', 'defined')
+      | selectattr('value.ovn_is_controller', 'true')
+      | selectattr('value.ovn_is_leader', 'defined')
+      | selectattr('value.ovn_is_leader', 'true')
       | map(attribute='key')
       | list }}
 
@@ -43,13 +34,23 @@
       {{ ansible_facts.all_ipv4_addresses
       | ansible.builtin.select('ansible.utils.in_any_network', ovn_mgmt_cidr)
       | ansible.builtin.first }}
+  when: ovn_addr is not defined
+
+- name: "Default variables are combined"
+  block:
+    - name: "OVN controller variables are merged"
+      ansible.builtin.set_fact:
+        ovn_central_conf: "{{ ovn_central_conf_default | ansible.builtin.combine(ovn_central_conf | default({}), recursive=true) }}"
+    - name: "OVN host variables are merged"
+      ansible.builtin.set_fact:
+        ovn_host_conf: "{{ ovn_host_conf_default | ansible.builtin.combine(ovn_host_conf | default({}), recursive=true) }}"
 
 - name: "Controller components for OVN are installed"
   ansible.builtin.include_tasks:
     file: controller.yml
     apply:
       become: true
-  when: is_controller | default(false) | bool
+  when: ovn_is_controller | default(false) | bool
 
 
 - name: "Host components for OVN are installed"
@@ -57,4 +58,4 @@
     file: node.yml
     apply:
       become: true
-  when: is_node | default(false) | bool
+  when: ovn_is_node | default(false) | bool

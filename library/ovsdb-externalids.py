@@ -7,32 +7,32 @@ __metaclass__ = type
 
 from ansible.module_utils.basic import AnsibleModule
 
-type Changed = bool
+Changed = bool
 IS_CHANGED: Changed = True
 IS_NOT_CHANGED: Changed = False
 
-type Err = str
+Err = str
 
 import traceback
 import ovs.stream
 import ovs.jsonrpc
 
-def MakeTransaction(conn: ovs.jsonrpc.Connection, newState: dict[str, str], checkMode: bool) -> tuple[Changed, Any, Err | None]:
+def MakeTransaction(conn: ovs.jsonrpc.Connection, newState: dict[str, str], checkMode: bool) -> tuple[Changed, dict[str, Any] | None, Err | None]:
     state, err = preflight(conn)
-    if err or state == None:
+    if err or state is None:
         return IS_NOT_CHANGED, None, err
-    if not state.items():
-        return IS_NOT_CHANGED, None, f"Database preflight returned nothing: {state.items()}"
     change = dict()
     for k, v in newState.items():
         if state.get(k) != v:
            change[k] = v
 
-    if not change.items():
-        return IS_NOT_CHANGED, "Already up to date", None
+    if not change:
+        return IS_NOT_CHANGED, {"msg": "Already up to date"}, None
+
+    diff = {"before": {k: state.get(k, "") for k in change}, "after": change}
 
     if checkMode:
-        return IS_CHANGED, str(change), None
+        return IS_CHANGED, {"msg": change, "diff": diff}, None
 
     mutQuery = [
             ["external_ids", "delete", ["set", list(change)]],
@@ -50,8 +50,10 @@ def MakeTransaction(conn: ovs.jsonrpc.Connection, newState: dict[str, str], chec
         return IS_NOT_CHANGED, None, 'OVSDB server did not reply'
     if resp.type == ovs.jsonrpc.Message.T_ERROR or resp.error is not None:
         return IS_NOT_CHANGED, None, f"RPC error: {resp.error}"
-
-    return IS_CHANGED, resp, None
+    for i in resp.result:
+        if isinstance(i, dict) and "error" in i:
+            return IS_NOT_CHANGED, None, f"Operational error: {i['error']}: {i.get('details')}"
+    return IS_CHANGED, {"msg": f"Updated {len(change)} key(s)", "diff": diff}, None
 
 
 def preflight(conn: ovs.jsonrpc.Connection) -> tuple[dict[str, str] | None, Err | None]:
@@ -66,15 +68,22 @@ def preflight(conn: ovs.jsonrpc.Connection) -> tuple[dict[str, str] | None, Err 
         return None, "OVSDB server did not reply"
     if resp.type == ovs.jsonrpc.Message.T_ERROR or resp.error is not None:
         return None, f"RPC error: {resp.error}"
+    for i in resp.result:
+        if isinstance(i, dict) and "error" in i:
+            return None, f"Operational error: {i['error']}: {i.get('details')}"
+        if isinstance(i, dict) and not i.get("rows"):
+            return None, f"Request returned no rows: {resp.result}"
     return dict(resp.result[0]["rows"][0]["external_ids"][1]), None
 
-def runModule(module: AnsibleModule):
+def runModule(module: AnsibleModule) -> tuple[Changed, dict[str, Any] | None, str | None]:
     error, stream = ovs.stream.Stream.open_block(ovs.stream.Stream.open(module.params["remote"]))
     if error:
-        return False, None, os.strerror(error)
+        return IS_NOT_CHANGED, None, os.strerror(error)
     rpc = ovs.jsonrpc.Connection(stream)
     newState = dict(i.split("=", 1) for i in module.params["ext_ids"])
-    return MakeTransaction(rpc, newState, module.check_mode)
+    chg, resp, err = MakeTransaction(rpc, newState, module.check_mode)
+    rpc.close()
+    return chg, resp, err
 
 
 def main():
@@ -91,7 +100,8 @@ def main():
         chg, res, err = runModule(module)
         if err:
             module.fail_json(changed=chg, msg=err)
-        module.exit_json(changed=chg, msg=str(res))
+
+        module.exit_json(changed=chg, **(res or {}))
     except Exception as e:
         module.fail_json(msg=str(e), exception=traceback.format_exc())
 

@@ -1,18 +1,10 @@
 OVN_CTL_OPTS="\
-{% for option, value in ovn_central_conf.items() if option != 'db_insecure' and value is not mapping %}
+{% for option, value in ovn_central_conf.items() if value is not mapping %}
 {% if value %}
 --{{ option | replace('_', '-') }}={{ value }} \
 {% endif %}
 {% endfor %}
-{% if ovn_central_conf.db_insecure | bool %}
---db-nb-create-insecure-remote=yes \
---db-sb-create-insecure-remote=yes \
-{% endif %}
-{% if __ovn_cluster_leader %}
---db-nb-cluster-local-addr={{ ovn_addr }}
---db-sb-cluster-local-addr={{ ovn_addr }}
-{% endif %}
-{% if not is_leader | bool and __ovn_cluster_leader %}
+{% if not ovn_is_leader | bool and __ovn_cluster_leader %}
 --db-nb-cluster-remote-addr={{ __ovn_cluster_leader }}
 --db-sb-cluster-remote-addr={{ __ovn_cluster_leader }}
 {% endif %}
