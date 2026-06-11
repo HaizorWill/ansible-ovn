@@ -1,20 +1,43 @@
 ---
 ovn_version: "latest"
+
+# Control the role of the host in a cluster
+ovn_is_controller: false
+ovn_is_leader: false
+ovn_is_node: false
+
+# Filter allowed networks by CIDR for extracted ovn_addr
 ovn_mgmt_cidr:
   - "0.0.0.0/0"
-is_controller: false
-is_leader: false
-is_node: false
-ovn_encap_type: geneve
+
+# These variables correspond to OVN_CTL_OPTS
 ovn_central_conf_default:
   db_nb_addr: ""
   db_nb_port: "6641"
   db_sb_addr: ""
   db_sb_port: "6642"
-  db_insecure: true
+  db_nb_create_insecure_remote: "yes"
+  db_sb_create_insecure_remote: "yes"
+  db_nb_cluster_local_addr: "{{ ovn_addr }}"
+  db_sb_cluster_local_addr: "{{ ovn_addr }}"
 ovn_host_conf_default:
-  ovn-controller-priority: ""
-  ovn-controller-ssl-key: ""
-  ovn-controller-ssl-cert: ""
-  ovn-controller-ssl-ca-cert: ""
-  ovn-controller-system-id: ""
+  ovn_controller_priority: ""
+  ovn_controller_ssl_key: ""
+  ovn_controller_ssl_cert: ""
+  ovn_controller_ssl_ca_cert: ""
+  ovn_controller_system_id: ""
+
+# These can be overridden to your liking, although it is recommended to keep ovn_remote and ovn_encap_ip intact
+ovn_remote: "{{ __ovn_sb_connection }}"
+ovn_encap_type: "geneve"
+ovn_encap_ip: "{{ ovn_addr }}"
+ovn_int_bridge: "br-int"
+ovn_bridge_mappings: "external:br-ext"
+
+# Set Open_vSwitch external_ids for ovn-controller to use
+ovn_controller_external_ids:
+  - "ovn-remote={{ ovn_remote }}"
+  - "ovn-encap-type={{ ovn_encap_type }}"
+  - "ovn-encap-ip={{ ovn_encap_ip }}"
+  - "ovn-bridge={{ ovn_int_bridge }}"
+  - "ovn-bridge-mappings={{ ovn_bridge_mappings }}"

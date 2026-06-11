@@ -1,28 +1,29 @@
 ---
-__ovn_cluster_proto: "{{ 'ssl:' if not ovn_central_conf.db_insecure | bool else 'tcp:' }}"
+__ovn_nb_proto: "{{ 'ssl:' if ovn_central_conf.db_nb_create_insecure_remote == 'no' else 'tcp:' }}"
+__ovn_sb_proto: "{{ 'ssl:' if ovn_central_conf.db_sb_create_insecure_remote == 'no' else 'tcp:' }}"
 
 # __ovn_cluster_leader is being set as remote cluster leader, and at the same time as listen address for cluster leader
 # this may become a problem if we want to make up a cluster out of nodes from different subnets.
 # Should set a flag for it or something
 __ovn_cluster_leader: >-
   {{ hostvars | dict2items
-  | selectattr('value.is_controller', 'defined')
-  | selectattr('value.is_controller', 'true')
-  | selectattr('value.is_leader', 'defined')
-  | selectattr('value.is_leader', 'true')
+  | selectattr('value.ovn_is_controller', 'defined')
+  | selectattr('value.ovn_is_controller', 'true')
+  | selectattr('value.ovn_is_leader', 'defined')
+  | selectattr('value.ovn_is_leader', 'true')
   | map(attribute='value.ovn_addr')
   | join(',') }}
 __ovn_nb_connection: >-
   {{ hostvars | dict2items
-  | selectattr('value.is_controller', 'defined')
-  | selectattr('value.is_controller', 'true')
+  | selectattr('value.ovn_is_controller', 'defined')
+  | selectattr('value.ovn_is_controller', 'true')
   | map(attribute='value.ovn_addr')
-  | map('regex_replace', "^(.*)$", __ovn_cluster_proto ~ '\1:' ~ ovn_central_conf.db_nb_port)
+  | map('regex_replace', "^(.*)$", __ovn_nb_proto ~ '\1:' ~ ovn_central_conf.db_nb_port)
   | list | join(',') }}
 __ovn_sb_connection: >-
   {{ hostvars | dict2items
-  | selectattr('value.is_controller', 'defined')
-  | selectattr('value.is_controller', 'true')
+  | selectattr('value.ovn_is_controller', 'defined')
+  | selectattr('value.ovn_is_controller', 'true')
   | map(attribute='value.ovn_addr')
-  | map('regex_replace', "^(.*)$", __ovn_cluster_proto ~ '\1:' ~ ovn_central_conf.db_sb_port)
+  | map('regex_replace', "^(.*)$", __ovn_sb_proto ~ '\1:' ~ ovn_central_conf.db_sb_port)
   | list | join(',') }}
