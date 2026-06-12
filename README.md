@@ -1,7 +1,5 @@
 # Ansible Role for OVN
 
-Heads up! This role is not finished and is subject to change.
-
 This ansible role is meant to automate the process of deploying and configuring OVN installation, making it reproducible and easy.
 
 ## Using the role
@@ -52,10 +50,21 @@ ovn_controller_external_ids:
 
 The role must have access to privileged command execution, i.e. become. It is used inside the role to run specific tasks as privileged user.
 
+Execution requires collecting and settings host facts, it also is necessary to provide IP address to use with OVN for each host. Inside the role it is implemented via setting ovn_addr fact, filtering ipv4 addresses with ovn_mgmt_cidr. It is used for both controller nodes and chassis nodes to install connection strings. Below is an example of setting variable beforehand:
+
 ```yaml
 ---
 - hosts: ovn-hosts
-  remote_user: ansible_user
+  gather_facts: true
+  tasks:
+    - name: "Set host addresses"
+      ansible.builtin.set_fact:
+        ovn_addr: >-
+          {{ ansible_facts.all_ipv4_addresses
+          | ansible.builtin.select('ansible.utils.in_any_network', ovn_mgmt_cidr)
+          | ansible.builtin.first }}
+      when: ovn_addr is not defined
+- hosts: ovn-hosts
   roles:
     - role: ovn
 ---
@@ -91,3 +100,19 @@ all:
             ovn_int_bridge: "br-in"
             ovn_bridge_mappings: "internet:br-ex"
 ```
+
+## Todo
+
+* Detect if a controller node was not clustered and reinit it's RAFT membership
+* Molecule tests and workflow
+* Python module CI
+* SSL certificate generation and respectable configuration checks*
+* Additional OVN cluster configuration on demand
+
+## Contributing
+
+Contributions are highly welcomed:
+
+* Bug reports
+* Pull requests
+* Tests and CI
