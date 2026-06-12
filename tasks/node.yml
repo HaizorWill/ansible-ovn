@@ -18,4 +18,3 @@
   ovsdb-externalids:
     remote: "unix:/var/run/openvswitch/db.sock"
     ext_ids: "{{ ovn_controller_external_ids }}"
-  become: true
