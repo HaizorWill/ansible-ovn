@@ -1,0 +1,25 @@
+---
+name: Lint
+on:
+  pull_request:
+  push:
+    branches: ["main"]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@6
+        with:
+          python-version: "3.13"
+          cache: pip
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run ansible-lint
+        run: ansible-lint .
+      
+      - name: Run yamllint
+        run: yamllint .
+        if: success() || failure()
