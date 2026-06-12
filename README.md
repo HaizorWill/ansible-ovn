@@ -61,31 +61,33 @@ The role must have access to privileged command execution, i.e. become. It is us
 ---
 all:
   children:
-    ovn-controller:
-      hosts:
-        ovn1.example.com:
-          ovn_is_leader: true
-        ovn2.example.com:
-        ovn3.example.com:
-      vars:
-        ovn_version: "latest"
-        ovn_is_controller: true
-        ovn_mgmt_cidr: 
-          - "10.0.0.0/8"
-        ovn_central_conf:
-          db_nb_addr: "{{ ovn_addr }}"
-          db_sb_addr: "{{ ovn_addr }}"
-    ovn-chassis:
-      hosts:
-        ovn-node1.example.com:
-        ovn-node2.example.com:
-        ovn-node3.example.com:
-      vars:
-        ovn_version: "latest"
-        ovn_is_node: true
-        ovn_mgmt_cidr:
-          - "10.0.0.0/8"
-        ovn_encap_type: "vxlan"
-        ovn_int_bridge: "br-in"
-        ovn_bridge_mappings: "internet:br-ex"
+    ovn-hosts:
+      children:
+        ovn-controller:
+          hosts:
+            ovn1.example.com:
+              ovn_is_leader: true
+            ovn2.example.com:
+            ovn3.example.com:
+          vars:
+            ovn_version: "latest"
+            ovn_is_controller: true
+            ovn_mgmt_cidr: 
+              - "10.0.0.0/8"
+            ovn_central_conf:
+              db_nb_addr: "{{ ovn_addr }}"
+              db_sb_addr: "{{ ovn_addr }}"
+        ovn-chassis:
+          hosts:
+            ovn-node1.example.com:
+            ovn-node2.example.com:
+            ovn-node3.example.com:
+          vars:
+            ovn_version: "latest"
+            ovn_is_node: true
+            ovn_mgmt_cidr:
+              - "10.0.0.0/8"
+            ovn_encap_type: "vxlan"
+            ovn_int_bridge: "br-in"
+            ovn_bridge_mappings: "internet:br-ex"
 ```
