@@ -2,6 +2,7 @@
 name: Lint
 on:
   pull_request:
+    branches: ["main"]
   push:
     branches: ["main"]
 
@@ -18,8 +19,8 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run ansible-lint
-        run: ansible-lint .
-      
+        run: ansible-lint . -f pep8
+
       - name: Run yamllint
-        run: yamllint .
+        run: yamllint . -f parsable
         if: success() || failure()
