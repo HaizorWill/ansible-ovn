@@ -1,20 +1,7 @@
 ---
-- name: "There is only one leader defined"
-  ansible.builtin.assert:
-    that:
-      - cluster_leaders | length == 1
-    fail_msg: >-
-      "Expected exactly one leader, found {{ cluster_leaders | length }}:
-      {{ cluster_leaders | join(',') }}"
-  vars:
-    cluster_leaders: >-
-      {{ hostvars | dict2items
-      | selectattr('value.ovn_is_controller', 'defined')
-      | selectattr('value.ovn_is_controller', 'true')
-      | selectattr('value.ovn_is_leader', 'defined')
-      | selectattr('value.ovn_is_leader', 'true')
-      | map(attribute='key')
-      | list }}
+- name: "Preflight is complete"
+  ansible.builtin.include_tasks:
+    file: preflight.yml
 
 - name: "Variables for operating system are defined"
   ansible.builtin.include_vars: "{{ distrovars }}"
@@ -51,7 +38,6 @@
     apply:
       become: true
   when: ovn_is_controller | default(false) | bool
-
 
 - name: "Host components for OVN are installed"
   ansible.builtin.include_tasks:
