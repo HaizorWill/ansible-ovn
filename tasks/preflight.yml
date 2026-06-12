@@ -1,0 +1,26 @@
+---
+- name: "There is only one leader defined"
+  ansible.builtin.assert:
+    that:
+      - cluster_leaders | length == 1
+    fail_msg: >-
+      "Expected exactly one leader, found {{ cluster_leaders | length }}:
+      {{ cluster_leaders | join(',') }}"
+  vars:
+    cluster_leaders: >-
+      {{ hostvars | dict2items
+      | selectattr('value.ovn_is_controller', 'defined')
+      | selectattr('value.ovn_is_controller', 'true')
+      | selectattr('value.ovn_is_leader', 'defined')
+      | selectattr('value.ovn_is_leader', 'true')
+      | map(attribute='key')
+      | list }}
+
+- name: "Variable ovn_mgmt_cidr is defined and set"
+  ansible.builtin.assert:
+    that:
+      - (ovn_mgmt_cidr is defined)
+      - (ovn_mgmt_cidr is iterable) and (ovn_mgmt_cidr is not string)
+      - ovn_mgmt_cidr | length > 0
+    fail_msg: >-
+      "Expected a list of CIDR strings, found {{ ovn_mgmt_cidr }}"
