@@ -1,0 +1,13 @@
+galaxy_info:
+  author: "HaizorWill"
+  description: "Ansible role that simplifies deployment and configuration of OVN components"
+  license: GPL-3.0-only
+  min_ansible_version: 2.19
+
+  galaxy_tags:
+    - ovn
+    - ovsdb
+    - sdn
+    - openstack
+
+dependencies: []
