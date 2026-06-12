@@ -1,3 +1,4 @@
+---
 galaxy_info:
   author: "HaizorWill"
   description: "Ansible role that simplifies deployment and configuration of OVN components"
