@@ -20,9 +20,6 @@ jobs:
           python-version: "3.13"
           cache: pip
 
-      - name: Install ansible-galaxy
-        run: pip install ansible-galaxy
-
       - name: Install ansible core
         run: pip install ansible-core==${{ matrix.core }}.*
       
