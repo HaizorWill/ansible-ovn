@@ -24,3 +24,5 @@ jobs:
 
       - name: Run test playbook
         run: ansible-playbook tests/test.yml -i tests/inventory.yml -v --diff
+        env:
+          ANSIBLE_ROLES_PATH: ${{ github.workspace }}/..
