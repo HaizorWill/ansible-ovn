@@ -3,6 +3,7 @@
   ansible.builtin.package:
     name: "{{ ovn_central_package }}"
     state: "{{ (ovn_version != 'latest') | ansible.builtin.ternary('present', 'latest') }}"
+  throttle: 1
 
 - name: "Ovn-central parameters file is generated"
   ansible.builtin.template:

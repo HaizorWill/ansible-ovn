@@ -10,6 +10,7 @@
     name: "ovn-central"
     enabled: true
     state: "restarted"
+  throttle: 1
 
 - name: "Enable ovn-host service"
   become: true
