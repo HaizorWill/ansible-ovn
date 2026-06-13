@@ -11,7 +11,7 @@ jobs:
   ansible-matrix:
     strategy:
       matrix:
-        core: ["2.12", "2.15", "2.20"]
+        core: ["2.16", "2.19"]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -19,8 +19,15 @@ jobs:
         with:
           python-version: "3.13"
           cache: pip
+
+      - name: Install ansible-galaxy
+        run: pip install ansible-galaxy==latest
+
       - name: Install ansible core
         run: pip install ansible-core==${{ matrix.core }}.*
+      
+      - name: Install ansible dependencies
+        run: ansible-galaxy install -r requirements.yml
 
       - name: Run test playbook
         run: ansible-playbook tests/test.yml -i tests/inventory.yml -v --diff
