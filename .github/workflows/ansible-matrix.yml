@@ -9,7 +9,6 @@ on:
 
 jobs:
   ansible-matrix:
-    needs: lint
     strategy:
       matrix:
         core: ["2.12", "2.15", "2.20"]
