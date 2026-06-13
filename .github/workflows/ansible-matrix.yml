@@ -26,7 +26,8 @@ jobs:
       - name: Install ansible dependencies
         run: ansible-galaxy install -r requirements.yml
 
+      # We pin ansible interpreter to debian default for executing the role itself
       - name: Run test playbook
-        run: ansible-playbook tests/test.yml -i tests/inventory.yml -v --diff
+        run: ansible-playbook tests/test.yml -i tests/inventory.yml -v --diff -e ansible_python_interpreter=/usr/bin/python3
         env:
           ANSIBLE_ROLES_PATH: ${{ github.workspace }}/..
