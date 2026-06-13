@@ -1,0 +1,27 @@
+---
+name: Ansible matrix test
+on:
+  pull_request:
+    branches: ["main"]
+  push:
+    branches: ["dev/**"]
+
+
+jobs:
+  ansible-matrix:
+    needs: lint
+    strategy:
+      matrix:
+        core: ["2.12", "2.15", "2.20"]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+          cache: pip
+      - name: Install ansible core
+        run: pip install ansible-core==${{ matrix.core }}.*
+
+      - name: Run test playbook
+        run: ansible-playbook tests/test.yml -i tests/inventory.yml -v --diff
