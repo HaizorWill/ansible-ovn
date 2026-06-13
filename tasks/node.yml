@@ -15,6 +15,6 @@
     - Enable ovn-host service
 
 - name: "Metadata for OVN-Controller is set"
-  ovsdb-externalids:
+  ovsdb_externalids:
     remote: "unix:/var/run/openvswitch/db.sock"
     ext_ids: "{{ ovn_controller_external_ids }}"
