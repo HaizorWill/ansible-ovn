@@ -21,7 +21,7 @@ jobs:
 
       - name: Install ansible core
         run: pip install ansible-core==${{ matrix.core }}.*
-      
+
       - name: Install ansible dependencies
         run: ansible-galaxy install -r requirements.yml
 
