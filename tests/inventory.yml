@@ -1,0 +1,18 @@
+---
+all:
+  hosts:
+    localhost:
+      ansible_connection: local
+      ovn_is_controller: true
+      ovn_is_leader: true
+      ovn_is_node: true
+      ovn_central_conf:
+        db_sb_addr: "{{ ovn_addr }}"
+        db_sb_port: "6699"
+      ovn_host_conf:
+        ovn_controller_priority: 10
+      ovn_encap_type: "vxlan"
+      ovn_controller_external_ids:
+        - "ovn-remote={{ ovn_remote }}"
+        - "ovn-encap-type={{ ovn_encap_type }}"
+        - "ovn-encap-ip={{ ovn_encap_ip }}"

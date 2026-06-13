@@ -1,0 +1,32 @@
+---
+name: Ansible matrix test
+on:
+  pull_request:
+    branches: ["main"]
+  push:
+    branches: ["main"]
+
+jobs:
+  ansible-matrix:
+    strategy:
+      matrix:
+        core: ["2.16", "2.19"]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install ansible core
+        run: pip install ansible-core==${{ matrix.core }}.*
+
+      - name: Install ansible dependencies
+        run: ansible-galaxy install -r requirements.yml
+
+      # We pin ansible interpreter to debian default for executing the role itself
+      - name: Run test playbook
+        run: ansible-playbook tests/test.yml -i tests/inventory.yml -v --diff -e ansible_python_interpreter=/usr/bin/python3
+        env:
+          ANSIBLE_ROLES_PATH: ${{ github.workspace }}/..

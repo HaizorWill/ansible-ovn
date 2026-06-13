@@ -66,7 +66,7 @@ Execution requires collecting and settings host facts, it also is necessary to p
       when: ovn_addr is not defined
 - hosts: ovn-hosts
   roles:
-    - role: ovn
+    - ansible-ovn
 ---
 all:
   children:
