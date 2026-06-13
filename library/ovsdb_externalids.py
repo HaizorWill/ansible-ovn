@@ -6,17 +6,21 @@ import sys
 from typing import Any
 __metaclass__ = type
 
-from ansible.module_utils.basic import AnsibleModule
+from ansible.module_utils.basic import AnsibleModule, missing_required_lib
+import traceback
+
+import_error: bool = False
+try:
+    import ovs.stream
+    import ovs.jsonrpc
+except ImportError:
+    import_error = True
 
 Changed = bool
 IS_CHANGED: Changed = True
 IS_NOT_CHANGED: Changed = False
 
 Err = str
-
-import traceback
-import ovs.stream
-import ovs.jsonrpc
 
 def MakeTransaction(conn: ovs.jsonrpc.Connection, newState: dict[str, str], checkMode: bool) -> tuple[Changed, dict[str, Any] | None, Err | None]:
     state, err = preflight(conn)
@@ -98,13 +102,8 @@ def main():
         supports_check_mode=True
     )
 
-    required_modules = [
-            "ovs"
-    ]
-    
-    for import_module in required_modules:
-        if module not in sys.modules:
-            module.fail_json(msg=f"Module {import_module} can not be imported")
+    if import_error:
+        module.fail_json(msg=missing_required_lib("ovs"))
 
     try:
         chg, res, err = runModule(module)
