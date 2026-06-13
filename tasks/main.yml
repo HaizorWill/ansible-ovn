@@ -20,7 +20,7 @@
     ovn_addr: >-
       {{ ansible_facts.all_ipv4_addresses
       | select('ansible.utils.in_any_network', ovn_mgmt_cidr)
-      | ansible.builtin.first }}
+      | first }}
   when: ovn_addr is not defined
 
 - name: "Default variables are combined"
