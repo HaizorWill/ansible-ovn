@@ -2,7 +2,6 @@
 
 from __future__ import (absolute_import, division, print_function)
 import os
-import sys
 from typing import Any
 __metaclass__ = type
 
@@ -15,6 +14,7 @@ try:
     import ovs.jsonrpc
 except ImportError:
     import_error = True
+    import_traceback = traceback.format_exc()
 
 Changed = bool
 IS_CHANGED: Changed = True
@@ -103,7 +103,7 @@ def main():
     )
 
     if import_error:
-        module.fail_json(msg=missing_required_lib("ovs"))
+        module.fail_json(msg=missing_required_lib("ovs"), details=import_traceback)
 
     try:
         chg, res, err = runModule(module)
